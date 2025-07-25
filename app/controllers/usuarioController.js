@@ -3,21 +3,29 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('../config/configuracion');
 
-exports.registrar = async (req, res) => {
+
+async function registrar(req, res) {
     try {
         const { nombre, correo, contrasena, rol } = req.body;
+
         const hash = await bcrypt.hash(contrasena, 10);
 
-        const nuevoUsuario = new Usuario({ nombre, correo, contrasena: hash, rol });
+        const nuevoUsuario = new Usuario({
+            nombre,
+            correo,
+            contrasena: hash,
+            rol
+        });
+
         await nuevoUsuario.save();
 
         res.status(201).json({ mensaje: 'Usuario registrado' });
     } catch (error) {
         res.status(400).json({ error: 'Error al registrar usuario' });
     }
-};
+}
 
-exports.login = async (req, res) => {
+async function login(req, res) {
     try {
         const { correo, contrasena } = req.body;
         const usuario = await Usuario.findOne({ correo });
@@ -32,4 +40,10 @@ exports.login = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error en el login' });
     }
-};
+} 
+
+
+module.exports = {
+    registrar,
+    login
+}
