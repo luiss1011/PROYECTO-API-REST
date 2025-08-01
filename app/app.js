@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const usuarioRoutes = require('./routes/usuarioRoutes')
 const tareasRoutes = require('./routes/tareasRoutes');
+const cors = require('cors');
+
+app.use(cors());
 
 app.use(express.urlencoded({extended:false}))
 

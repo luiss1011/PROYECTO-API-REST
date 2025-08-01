@@ -15,7 +15,7 @@ function agregarTarea(req, res) {
 
     const nuevaTarea = {
         ...req.body,
-        alumnoId: req.usuario.id // <-- Agrega el ID del alumno desde el token
+        alumnoId: req.usuario.id
     };
     
     new tareasModel(nuevaTarea).save()
@@ -51,6 +51,12 @@ function buscarTarea(req, res, next) {
 function eliminarTarea(req, res) {
     var tareas = {}
     tareas = req.body.tareas
+
+    if (!tareas || !tareas.length) {
+        return res.status(200).send({
+            mensaje: "No se encontró la tarea a eliminar"
+        })
+    }
 
     tareasModel.deleteOne(tareas[0])
     .then(info =>{

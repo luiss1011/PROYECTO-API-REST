@@ -26,9 +26,9 @@ const tareasSchema = new mongoose.Schema({
         length: 150,
         required: true
     },
-    alumnoId: { // para relacionar con el usuario
+    alumnoId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Usuario',
+        ref: 'usuario',
         required: true
     }
 });
