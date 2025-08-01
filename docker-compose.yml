@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: api_container
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB=mongodb://root:password@mongo1:27017/api-rest?authSource=admin
+      - SECRET_KEY=segura
+    depends_on:
+      - mongo1
+    networks:
+      - app-network
+
+  mongo1:
+    image: mongo
+    container_name: mongo_container
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
