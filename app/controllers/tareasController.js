@@ -17,8 +17,18 @@ function agregarTarea(req, res) {
         ...req.body,
         alumnoId: req.usuario.id
     };
-    
-    new tareasModel(nuevaTarea).save()
+
+    tareasModel.findOne({ nombreTarea: nuevaTarea.nombreTarea })
+        .then(tareaExistente => {
+            if (tareaExistente) {
+                return res.status(400).send({
+                    mensaje: "Ya existe una tarea con ese nombre, pruebe con otro"
+                });
+            }
+
+            return new tareasModel(nuevaTarea).save();
+        })
+
     .then(info => {
         return res.status(200).send({
             mensaje: "La información se guardo de forma correcta",

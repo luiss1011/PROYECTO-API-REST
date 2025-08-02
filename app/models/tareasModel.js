@@ -4,7 +4,8 @@ const tareasSchema = new mongoose.Schema({
     nombreTarea: {
         type: String,
         required: true,
-        length: 50
+        length: 50,
+        unique: true
     },
     materia:{
         type: String,
