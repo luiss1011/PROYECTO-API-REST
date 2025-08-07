@@ -1,7 +1,7 @@
 const tareasModel = require('../models/tareasModel');
 
 function buscarTodo(req, res) {
-    tareasModel.find({})
+    tareasModel.find({ correoUsuario: req.usuario.correo }) 
     .then(tareas => {
         if (tareas.length) {
             return res.status(200).send({tareas}) 
@@ -12,10 +12,10 @@ function buscarTodo(req, res) {
 }
 
 function agregarTarea(req, res) {
-
     const nuevaTarea = {
         ...req.body,
-        alumnoId: req.usuario.id
+        alumnoId: req.usuario.id,
+        correoUsuario: req.usuario.correo
     };
 
     tareasModel.findOne({ nombreTarea: nuevaTarea.nombreTarea })
@@ -25,20 +25,23 @@ function agregarTarea(req, res) {
                     mensaje: "Ya existe una tarea con ese nombre, pruebe con otro"
                 });
             }
-            
-            return new tareasModel(nuevaTarea).save();
-        })
 
-    .then(info => {
-        return res.status(200).send({
-            mensaje: "La información se guardo de forma correcta",
-            info
+            // Solo llega aquí si no existe, y retornamos la promesa
+            return new tareasModel(nuevaTarea).save()
+                .then(info => {
+                    return res.status(200).send({
+                        mensaje: "La información se guardó de forma correcta",
+                        info
+                    });
+                });
         })
-    })
-    .catch(e => {return res.status(404).send({
-        mensaje:`error al guardar ${e}`
-    })})
+        .catch(e => {
+            return res.status(404).send({
+                mensaje: `Error al guardar ${e.message}`
+            });
+        });
 }
+
 
 function buscarTarea(req, res, next) {
     if (!req.body) req.body = {}

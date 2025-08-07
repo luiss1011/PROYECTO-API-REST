@@ -4,7 +4,7 @@ const usuarioRoutes = require('./routes/usuarioRoutes')
 const tareasRoutes = require('./routes/tareasRoutes');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocumentation = require('./swagger.json')
+const swaggerDocumentation = require('../swagger.json')
 
 app.use(cors());
 
