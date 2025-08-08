@@ -11,6 +11,17 @@ router.post('/',
     auth.verificarToken,
     tareasController.agregarTarea
 );
+
+router.put('/completar/:nombreTarea', 
+    auth.verificarToken, 
+    tareasController.marcarComoCompletada
+);
+
+router.get('/completadas', 
+    auth.verificarToken, 
+    tareasController.mostrarCompletadas
+);
+
 router.get('/:key/:value', 
     auth.verificarToken,
     tareasController.buscarTarea, 
@@ -26,5 +37,7 @@ router.put('/:key/:value',
     tareasController.buscarTarea, 
     tareasController.actualizarTarea
 );
+
+
 
 module.exports = router;

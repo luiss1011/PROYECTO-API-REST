@@ -1,45 +1,76 @@
 const tareasModel = require('../models/tareasModel');
 
 function buscarTodo(req, res) {
-    tareasModel.find({ correoUsuario: req.usuario.correo }) 
-    .then(tareas => {
-        if (tareas.length) {
-            return res.status(200).send({tareas}) 
-        }
-        return res.status(204).send({menaje: "No hay nada que mostrar"})
-    })
-    .catch(e => {return res.status(404).send({mensaje: `Eror al consultar la información ${e}`})})
+    const orden = req.query.orden;
+    const consulta = { correoUsuario: req.usuario.correo };
+    let sortOptions = {};
+
+    if (orden === 'fecha-desc') {
+        sortOptions.fechaEntrega = -1;
+    } else if (orden === 'fecha-asc') {
+        sortOptions.fechaEntrega = 1;
+    } else if (orden === 'nombre-asc') {
+        sortOptions.nombreTarea = 1;
+    } else if (orden === 'nombre-desc') {
+        sortOptions.nombreTarea = -1;
+    }
+
+    tareasModel.find(consulta)
+        .collation({ locale: 'en', strength: 2 }) // 👈 esto hace el orden insensible a mayúsculas
+        .sort(sortOptions)
+        .then(tareas => {
+            if (tareas.length) {
+                return res.status(200).send({ tareas });
+            }
+            return res.status(204).send({ mensaje: "No hay nada que mostrar" });
+        })
+        .catch(e => {
+            return res.status(404).send({
+                mensaje: `Error al consultar la información: ${e.message}`
+            });
+        });
 }
 
 function agregarTarea(req, res) {
+    const { fechaEntrega, horaEntrega } = req.body;
+
+    // Combinar fecha y hora en un solo objeto Date
+    let fechaCompleta = null;
+    if (fechaEntrega && horaEntrega) {
+        fechaCompleta = new Date(`${fechaEntrega}T${horaEntrega}:00`);
+    }
+
     const nuevaTarea = {
         ...req.body,
+        fechaEntrega: fechaCompleta, // guardamos fecha + hora en un solo campo
         alumnoId: req.usuario.id,
         correoUsuario: req.usuario.correo
     };
 
-    tareasModel.findOne({ nombreTarea: nuevaTarea.nombreTarea })
-        .then(tareaExistente => {
-            if (tareaExistente) {
-                return res.status(400).send({
-                    mensaje: "Ya existe una tarea con ese nombre, pruebe con otro"
-                });
-            }
-
-            // Solo llega aquí si no existe, y retornamos la promesa
-            return new tareasModel(nuevaTarea).save()
-                .then(info => {
-                    return res.status(200).send({
-                        mensaje: "La información se guardó de forma correcta",
-                        info
-                    });
-                });
-        })
-        .catch(e => {
-            return res.status(404).send({
-                mensaje: `Error al guardar ${e.message}`
+    tareasModel.findOne({ 
+        nombreTarea: nuevaTarea.nombreTarea, 
+        correoUsuario: nuevaTarea.correoUsuario 
+    })
+    .then(tareaExistente => {
+        if (tareaExistente) {
+            return res.status(400).send({
+                mensaje: "Ya tienes una tarea con ese nombre. Elige otro nombre diferente."
             });
+        }
+
+        return new tareasModel(nuevaTarea).save()
+            .then(info => {
+                return res.status(200).send({
+                    mensaje: "La información se guardó de forma correcta",
+                    info
+                });
+            });
+    })
+    .catch(e => {
+        return res.status(500).send({
+            mensaje: `Error al guardar: ${e.message}`
         });
+    });
 }
 
 
@@ -105,6 +136,39 @@ function actualizarTarea(req, res) {
     })
 }
 
+function marcarComoCompletada(req, res) {
+  const { nombreTarea } = req.params;
+  const correo = req.usuario.correo;
+
+  tareasModel.findOne({ nombreTarea, correoUsuario: correo })
+    .then(tarea => {
+      if (!tarea) {
+        return res.status(404).json({ mensaje: "Tarea no encontrada" });
+      }
+
+      tarea.completada = true;
+      return tarea.save();
+    })
+    .then(tareaActualizada => {
+      res.json({ mensaje: "Tarea marcada como completada", tarea: tareaActualizada });
+    })
+    .catch(error => {
+      res.status(500).json({ mensaje: "Error al completar tarea", error });
+    });
+}
+
+function mostrarCompletadas(req, res) {
+    const correo = req.usuario.correo;
+
+  tareasModel.find({ correoUsuario: correo, completada: true })
+    .then(tareas => {
+      res.json({ tareas });
+    })
+    .catch(error => {
+      res.status(500).json({ mensaje: "Error al obtener historial", error });
+    });
+}
+
 function mostrarTarea(req, res) {
     if(req.body.e){return res.status(404).send({mensaje: `error al buscar la información`})}
     if(!req.body.tareas){return res.status(204).send({mensaje: `No hay nada que mostrar`})}
@@ -118,5 +182,7 @@ module.exports = {
     buscarTodo,
     agregarTarea,
     buscarTarea,
-    mostrarTarea
+    mostrarTarea,
+    marcarComoCompletada,
+    mostrarCompletadas
 };

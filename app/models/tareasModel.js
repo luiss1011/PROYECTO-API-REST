@@ -4,8 +4,7 @@ const tareasSchema = new mongoose.Schema({
     nombreTarea: {
         type: String,
         required: true,
-        length: 50,
-        unique: true
+        length: 50
     },
     materia:{
         type: String,
@@ -27,11 +26,21 @@ const tareasSchema = new mongoose.Schema({
         length: 150,
         required: true
     },
+    completada: { 
+        type: Boolean, 
+        default: false 
+    },
     alumnoId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'usuario',
         required: true
+    },
+    correoUsuario: {
+    type: String,
+    required: true
     }
+
 });
+
 
 module.exports = mongoose.model('tareas', tareasSchema);
