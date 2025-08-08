@@ -32,17 +32,9 @@ function buscarTodo(req, res) {
 }
 
 function agregarTarea(req, res) {
-    const { fechaEntrega, horaEntrega } = req.body;
-
-    // Combinar fecha y hora en un solo objeto Date
-    let fechaCompleta = null;
-    if (fechaEntrega && horaEntrega) {
-        fechaCompleta = new Date(`${fechaEntrega}T${horaEntrega}:00`);
-    }
 
     const nuevaTarea = {
         ...req.body,
-        fechaEntrega: fechaCompleta, // guardamos fecha + hora en un solo campo
         alumnoId: req.usuario.id,
         correoUsuario: req.usuario.correo
     };
