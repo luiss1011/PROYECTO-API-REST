@@ -1,10 +1,69 @@
 const tareasModel = require('../models/tareasModel');
 
+// function buscarTodo(req, res) {
+//     const orden = req.query.orden;
+//     const completada = req.query.completada; // <-- Nuevo
+
+//     const consulta = { correoUsuario: req.usuario.correo };
+//     if (completada !== undefined) {
+//         consulta.completada = completada === 'true';
+//     }
+
+//     let sortOptions = {};
+//     if (orden === 'fecha-desc') {
+//         sortOptions.fechaEntrega = -1;
+//     } else if (orden === 'fecha-asc') {
+//         sortOptions.fechaEntrega = 1;
+//     } else if (orden === 'nombre-asc') {
+//         sortOptions.nombreTarea = 1;
+//     } else if (orden === 'nombre-desc') {
+//         sortOptions.nombreTarea = -1;
+//     }
+
+//     tareasModel.find(consulta)
+//         .collation({ locale: 'en', strength: 2 })
+//         .sort(sortOptions)
+//         .then(tareas => {
+//             if (tareas.length) {
+//                 return res.status(200).send({ tareas });
+//             }
+//             return res.status(204).send({ mensaje: "No hay nada que mostrar" });
+//         })
+//         .catch(e => {
+//             return res.status(404).send({
+//                 mensaje: `Error al consultar la información: ${e.message}`
+//             });
+//         });
+// }
+
 function buscarTodo(req, res) {
     const orden = req.query.orden;
-    const consulta = { correoUsuario: req.usuario.correo };
-    let sortOptions = {};
+    const completada = req.query.completada;
+    const nombreTarea = req.query.nombreTarea;
+    const materia = req.query.materia;
+    const prioridad = req.query.prioridad;
 
+    const consulta = { correoUsuario: req.usuario.correo };
+
+    if (completada !== undefined) {
+        consulta.completada = completada === 'true';
+    }
+
+    if (nombreTarea) {
+        // Busca nombreTarea con regex para coincidencia parcial e insensible a mayúsculas
+        consulta.nombreTarea = { $regex: nombreTarea, $options: 'i' };
+    }
+
+    if (materia) {
+        consulta.materia = { $regex: materia, $options: 'i' };
+    }
+
+    if (prioridad) {
+        // Si prioridad es un valor exacto (Alta, Media, Baja)
+        consulta.prioridad = prioridad;
+    }
+
+    let sortOptions = {};
     if (orden === 'fecha-desc') {
         sortOptions.fechaEntrega = -1;
     } else if (orden === 'fecha-asc') {
@@ -16,7 +75,7 @@ function buscarTodo(req, res) {
     }
 
     tareasModel.find(consulta)
-        .collation({ locale: 'en', strength: 2 }) // 👈 esto hace el orden insensible a mayúsculas
+        .collation({ locale: 'en', strength: 2 })
         .sort(sortOptions)
         .then(tareas => {
             if (tareas.length) {
@@ -30,6 +89,7 @@ function buscarTodo(req, res) {
             });
         });
 }
+
 
 function agregarTarea(req, res) {
 
