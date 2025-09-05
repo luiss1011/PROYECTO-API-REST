@@ -5,6 +5,12 @@ const tareasRoutes = require('./routes/tareasRoutes');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocumentation = require('../swagger.json')
+const recordatoriosRoutes = require('./routes/recordatoriosRoutes');
+
+// ... otras configuraciones del servidor ...
+
+// Rutas de la API
+
 
 app.use(cors());
 
@@ -16,5 +22,6 @@ app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocumentation))
 
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/tareas', tareasRoutes);
+app.use('/api/recordatorios', recordatoriosRoutes);
 
 module.exports = app

@@ -50,7 +50,16 @@ async function login(req, res) {
         if (!valid) return res.status(401).send({ mensaje: 'Contraseña incorrecta' });
 
         const token = jwt.sign({ id: usuario._id, nombre: usuario.nombre, correo:usuario.correo }, config.SECRET_KEY, { expiresIn: '1h' });
-        res.status(200).send({ token });
+        
+        res.status(200).send({
+            token,
+            usuario: {
+                id: usuario._id,
+                nombre: usuario.nombre,
+                correo: usuario.correo,
+            }
+        });
+
     } catch (e) {
         res.status(500).send({ mensaje: 'Error en el login', e });
     }

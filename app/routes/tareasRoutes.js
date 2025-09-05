@@ -17,6 +17,8 @@ router.put('/completar/:nombreTarea',
     tareasController.marcarComoCompletada
 );
 
+router.put('/desmarcar/:nombreTarea', auth.verificarToken, tareasController.desmarcarTareaCompletada);
+
 router.get('/completadas', 
     auth.verificarToken, 
     tareasController.mostrarCompletadas
