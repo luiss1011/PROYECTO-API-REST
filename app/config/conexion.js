@@ -1,15 +1,15 @@
-const config = require('./configuracion')
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const CONFIG = require('./configuracion');
 
-module.exports = {
-    connection: null,
-    connect: ()=>{
-        if(this.connection) return this.connection
-        return mongoose.connect(config.DB)
-        .then(conn => {
-            this.connection = conn
-            console.log('La conexión se realizo con exito')
-        })
-        .catch(e => (console.log(`Error en la conexion ${e}`)))
-    }
-}
+module.exports.connect = async () => {
+  try {
+    await mongoose.connect(CONFIG.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✅ Conexión exitosa a MongoDB');
+  } catch (error) {
+    console.error('❌ Error al conectar a MongoDB:', error.message);
+    process.exit(1);
+  }
+};
